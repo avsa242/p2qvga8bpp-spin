@@ -34,7 +34,6 @@ VAR
     long    PaletteBmpAddress
   
 OBJ
-    game:   "raycast5b_SpinGraphics1e" 
     ser:    "com.serial.terminal.ansi"
     VGA:    "display.vga4"
     time:   "time"
