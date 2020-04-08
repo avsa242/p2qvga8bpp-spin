@@ -1,0 +1,123 @@
+CON
+
+    _XTALFREQ   = 20_000_000                                    ' crystal frequency
+    _XDIV       = 2'10                                            ' crystal divider to give 1MHz
+    _XMUL       = 25'125                                          ' crystal / div * mul
+    _XDIVP      = 1                                             ' crystal / div * mul /divp to give _CLKFREQ (1,2,4..30)
+    _XOSC       = %10                                  'OSC    ' %00=OFF, %01=OSC, %10=15pF, %11=30pF
+    _XSEL       = %11                                   'XI+PLL ' %00=rcfast(20+MHz), %01=rcslow(~20KHz), %10=XI(5ms), %11=XI+PLL(10ms)
+    _XPPPP      = ((_XDIVP>>1) + 15) & $F                       ' 1->15, 2->0, 4->1, 6->2...30->14
+    _CLOCKFREQ  = _XTALFREQ / _XDIV * _XMUL / _XDIVP            ' internal clock frequency
+    _SETFREQ    = 1<<24 + (_XDIV-1)<<18 + (_XMUL-1)<<8 + _XPPPP<<4 + _XOSC<<2  ' %0000_000e_dddddd_mmmmmmmmmm_pppp_cc_00  ' setup  oscillator
+    _ENAFREQ    = _SETFREQ + _XSEL
+
+    _clkmode    = _SETFREQ
+    _clkfreq    = 250_000_000
+
+
+    WIDTH       = 320
+    HEIGHT      = 240
+    XMAX        = WIDTH-1
+    YMAX        = HEIGHT-1
+    BUFFSZ      = WIDTH * HEIGHT
+
+    RX_PIN      = 63
+    TX_PIN      = 62
+    SER_BAUD    = 2_000_000
+    LED         = cfg#LED1
+
+    VGA_BASEPIN = 0
+
+VAR
+
+    long    _palette[256]
+    byte    _framebuffer[BUFFSZ]
+
+OBJ
+
+    cfg :   "core.con.boardcfg.p2eval"
+    ser :   "com.serial.terminal.ansi"
+    io  :   "io"
+    vga :   "display.vga.bitmap-8bpp"
+    time:   "time"
+    fnt :   "font.5x8"
+
+PUB Main | tmp, c, x, y
+
+    Setup
+    tmp := c := 0
+
+    vga.Box(0, 0, XMAX, YMAX, 252, FALSE)
+
+    repeat y from 0 to HEIGHT-1
+        repeat x from 0 to WIDTH-1
+            vga.Plot(x, y, c)
+            c++
+            if c > 255
+                c := 0
+    vga.FGColor(255)
+    vga.Position(0, 0)
+    vga.str(string("Ready"))
+
+    FlashLED(LED, 100)
+
+
+    repeat tmp from 0 to BUFFSZ-1
+'        ser.position(0, 5)
+'        ser.printf("fbpos = %d", tmp)
+        _framebuffer[tmp] := c
+        c++
+        if c>255
+            c := 0
+
+    FlashLED(LED, 100)
+
+PUB Setup
+
+    clkset(_clkmode, _clkfreq)
+    repeat until ser.StartRXTX(rx_pin, tx_pin, 0, ser_baud)
+    ser.clear
+    ser.printf("Serial terminal started - p2 @ %dMHz\n", clkfreq/1000000)
+    SetupPalette
+    vga.FontAddress(fnt.BaseAddr)
+    vga.FontSize(6, 8)
+    if vga.start(VGA_BASEPIN, @_framebuffer, @_palette, WIDTH, HEIGHT)
+        ser.printf("VGA 8bpp driver started\n")
+    else
+        ser.printf("VGA 8bpp driver failed to start\n")
+        repeat
+
+PUB SetupPalette | i, r, g, b, c
+' Set up palette
+    r := 0
+    g := 0
+    b := 0
+
+    repeat i from 0 to 255
+        c := 0 | (r << 16) | (g << 8) | b
+        _palette[i] := c
+
+        case i
+            0..63:
+                r += 4
+                g := 0
+                b := 0
+            64..127:
+                r := 0
+                g += 4
+                b := 0
+            128..191:
+                r := 0
+                g := 0
+                b += 4
+            192..253:
+                r += 4
+                g += 4
+                b := 0
+            254..255:
+                r := 255
+                g := 255
+                b := 255
+
+#include "lib.utility.spin2"
+
