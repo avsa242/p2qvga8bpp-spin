@@ -169,8 +169,8 @@ PUB Demo_Circle(testtime) | iteration, x, y, r, c
     return iteration
 
 PUB Demo_Greet
-' Display the banner/greeting on the OLED
-    vga.FGColor($FFFF)
+' Display the banner/greeting
+    vga.FGColor(255)
     vga.BGColor(0)
     vga.Position (0, 0)
     vga.Str (string("VGA 8bpp on the"))
@@ -192,7 +192,7 @@ PUB Demo_Greet
     vga.Update
 
 PUB Demo_Line (testtime) | iteration, c
-' Draws random lines with color -1 (invert)
+' Draws random lines
     ser.str(string("Demo_Line - "))
     _timer_set := testtime
     iteration := 0
@@ -207,8 +207,7 @@ PUB Demo_Line (testtime) | iteration, c
     return iteration
 
 PUB Demo_LineSweepX (testtime) | iteration, x, c
-' Draws lines top left to lower-right, sweeping across the screen, then
-'  from the top-down
+' Draws lines sweeping from left-right to the opposite diagonal direction
     x := 0
 
     ser.str(string("Demo_LineSweepX - "))
@@ -230,8 +229,7 @@ PUB Demo_LineSweepX (testtime) | iteration, x, c
     return iteration
 
 PUB Demo_LineSweepY (testtime) | iteration, y, c
-' Draws lines top left to lower-right, sweeping across the screen, then
-'  from the top-down
+' Draws lines sweeping from top-down to the opposite diagonal direction
     y := 0
 
     ser.str(string("Demo_LineSweepY - "))
@@ -271,7 +269,7 @@ PUB Demo_MEMScroller(testtime, start_addr, end_addr) | iteration, pos, st, en
     return iteration
 
 PUB Demo_Plot(testtime) | iteration, x, y, c
-' Draws random pixels to the screen, with color -1 (invert)
+' Draws random pixels to the screen
     ser.str(string("Demo_Plot - "))
     _timer_set := testtime
     iteration := 0
@@ -334,7 +332,7 @@ PUB Demo_Sinewave(testtime) | iteration, x, y, modifier, offset, div
     return iteration
 
 PUB Demo_SeqText(testtime) | iteration, col, row, maxcol, maxrow, ch, st, fg, bg
-' Sequentially draws the whole font table to the screen, then random characters
+' Sequentially draws the whole font table to the screen
     maxcol := (WIDTH/vga.FontWidth)-1
     maxrow := (HEIGHT/vga.FontHeight)-1
     ch := $00
@@ -366,7 +364,7 @@ PUB Demo_SeqText(testtime) | iteration, col, row, maxcol, maxrow, ch, st, fg, bg
     return iteration
 
 PUB Demo_RndText(testtime) | iteration, col, row, maxcol, maxrow, ch, st, fg, bg
-
+' Draws random characters to the screen
     maxcol := (WIDTH/vga.FontWidth)-1
     maxrow := (HEIGHT/vga.FontHeight)-1
     ch := $00
@@ -459,7 +457,7 @@ PUB Demo_Wander(testtime) | iteration, x, y, d, c, movestep
     return iteration
 
 PUB RND(maxval) | i
-
+' Return a random number up to maximum 'maxval'
     asm
         getrnd i
         shr i, #16
@@ -479,7 +477,7 @@ PUB Sin(angle) | tmp
     return tmp
 
 PRI Report(testtime, iterations)
-
+' Display performance results
     ser.str(string("Total iterations: "))
     ser.dec(iterations)
 
