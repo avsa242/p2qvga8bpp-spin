@@ -1,14 +1,14 @@
 CON
 
-    _XTALFREQ   = 20_000_000                                    ' crystal frequency
-    _XDIV       = 2'10                                            ' crystal divider to give 1MHz
-    _XMUL       = 25'125                                          ' crystal / div * mul
-    _XDIVP      = 1                                             ' crystal / div * mul /divp to give _CLKFREQ (1,2,4..30)
-    _XOSC       = %10                                  'OSC    ' %00=OFF, %01=OSC, %10=15pF, %11=30pF
-    _XSEL       = %11                                   'XI+PLL ' %00=rcfast(20+MHz), %01=rcslow(~20KHz), %10=XI(5ms), %11=XI+PLL(10ms)
-    _XPPPP      = ((_XDIVP>>1) + 15) & $F                       ' 1->15, 2->0, 4->1, 6->2...30->14
-    _CLOCKFREQ  = _XTALFREQ / _XDIV * _XMUL / _XDIVP            ' internal clock frequency
-    _SETFREQ    = 1<<24 + (_XDIV-1)<<18 + (_XMUL-1)<<8 + _XPPPP<<4 + _XOSC<<2  ' %0000_000e_dddddd_mmmmmmmmmm_pppp_cc_00  ' setup  oscillator
+    _XTALFREQ   = 20_000_000
+    _XDIV       = 2'10
+    _XMUL       = 25'125
+    _XDIVP      = 1
+    _XOSC       = %10
+    _XSEL       = %11
+    _XPPPP      = ((_XDIVP>>1) + 15) & $F
+    _CLOCKFREQ  = _XTALFREQ / _XDIV * _XMUL / _XDIVP
+    _SETFREQ    = 1<<24 + (_XDIV-1)<<18 + (_XMUL-1)<<8 + _XPPPP<<4 + _XOSC<<2
     _ENAFREQ    = _SETFREQ + _XSEL
 
     _clkmode    = _SETFREQ
@@ -28,7 +28,8 @@ CON
     SER_BAUD    = 2_000_000
     LED         = cfg#LED1
 
-    VGA_BASEPIN = 0
+    VGA_BASEPIN = 0                                         ' 0, 8, 16, 24, 32, 40, 48
+'                                                               Works with all basepins on the P2ES except 56
 
 VAR
 
@@ -63,6 +64,7 @@ PUB Main | time_ms
     time_ms := 10_000
 
     ser.position (0, 3)
+    Demo_Shadebobs (time_ms)
 
     Demo_SineWave (time_ms)
     vga.ClearAll
@@ -70,7 +72,7 @@ PUB Main | time_ms
     Demo_TriWave (time_ms)
     vga.ClearAll
 
-    Demo_MEMScroller(time_ms, $0000, $FFFF-BUFFSZ)
+    Demo_MEMScroller(time_ms, $0000, $7_FFFF)
     vga.ClearAll
 
     Demo_Bitmap (time_ms, $1_0000)
@@ -127,7 +129,7 @@ PUB Demo_BouncingBall(testtime, radius) | iteration, bx, by, dx, dy
             dx *= -1
 
         vga.Circle (bx, by, radius, $FFFF)
-        vga.Update
+        vga.WaitVSync
         iteration++
         vga.Clear
 
@@ -158,7 +160,7 @@ PUB Demo_Circle(testtime) | iteration, x, y, r, c
         x := rnd(XMAX)
         y := rnd(YMAX)
         r := rnd(YMAX/2)
-        c := (?_rndseed >> 26) << 11 | (?_rndseed >> 25) << 5 | (?_rndseed >> 26)
+        c := rnd(255)
         vga.Circle (x, y, r, c)
         vga.Update
         iteration++
@@ -171,15 +173,11 @@ PUB Demo_Greet
     vga.FGColor($FFFF)
     vga.BGColor(0)
     vga.Position (0, 0)
-    vga.Str (string("VGA 320x200x8bpp on the"))
+    vga.Str (string("VGA 8bpp on the"))
 
     vga.Position (0, 1)
-    vga.Str (string("Parallax"))
+    vga.Str (string("Parallax P2X8C4M64P @ "))
 
-    vga.Position (0, 2)
-    vga.Str (string("P2X8C4M64P @ "))
-
-    vga.Position (0, 3)
     vga.Str (int.Dec(clkfreq/1_000_000))
     vga.Str (string("MHz"))
 
@@ -200,7 +198,7 @@ PUB Demo_Line (testtime) | iteration, c
     iteration := 0
 
     repeat while _timer_set
-        c := (?_rndseed >> 26) << 11 | (?_rndseed >> 25) << 5 | (?_rndseed >> 26)
+        c := rnd(255)
         vga.Line (rnd(XMAX), rnd(YMAX), rnd(XMAX), rnd(YMAX), c)
         vga.Update
         iteration++
@@ -208,7 +206,7 @@ PUB Demo_Line (testtime) | iteration, c
     Report(testtime, iteration)
     return iteration
 
-PUB Demo_LineSweepX (testtime) | iteration, x
+PUB Demo_LineSweepX (testtime) | iteration, x, c
 ' Draws lines top left to lower-right, sweeping across the screen, then
 '  from the top-down
     x := 0
@@ -221,14 +219,17 @@ PUB Demo_LineSweepX (testtime) | iteration, x
         x++
         if x > XMAX
             x := 0
-        vga.Line (x, 0, XMAX-x, YMAX, x)
+        c++
+        if c > 255
+            c := 0
+        vga.Line (x, 0, XMAX-x, YMAX, c)
         vga.Update
         iteration++
 
     Report(testtime, iteration)
     return iteration
 
-PUB Demo_LineSweepY (testtime) | iteration, y
+PUB Demo_LineSweepY (testtime) | iteration, y, c
 ' Draws lines top left to lower-right, sweeping across the screen, then
 '  from the top-down
     y := 0
@@ -241,7 +242,10 @@ PUB Demo_LineSweepY (testtime) | iteration, y
         y++
         if y > YMAX
             y := 0
-        vga.Line (XMAX, y, 0, YMAX-y, y)
+        c++
+        if c > 255
+            c := 0
+        vga.Line (XMAX, y, 0, YMAX-y, c)
         vga.Update
         iteration++
 
@@ -257,7 +261,7 @@ PUB Demo_MEMScroller(testtime, start_addr, end_addr) | iteration, pos, st, en
 
     repeat while _timer_set
         pos += BPL
-        if pos >end_addr
+        if pos > end_addr
             pos := start_addr
         vga.Bitmap (pos, BUFFSZ, 0)
         vga.Update
@@ -273,9 +277,34 @@ PUB Demo_Plot(testtime) | iteration, x, y, c
     iteration := 0
 
     repeat while _timer_set
-        c := (?_rndseed >> 26) << 11 | (?_rndseed >> 25) << 5 | (?_rndseed >> 26)
+        c := rnd(255)
         vga.Plot (rnd(XMAX), rnd(YMAX), c)
         vga.Update
+        iteration++
+
+    Report(testtime, iteration)
+    return iteration
+
+PUB Demo_Shadebobs(testtime) | iteration, x, y, xs, ys, p, offset, div, modifier
+' Draws Shadebobs along a sine-wave
+    ser.str(string("Demo_Shadebobs - "))
+
+    div := 1024
+    offset := YMAX/2
+
+    _timer_set := testtime
+    iteration := 0
+
+    repeat while _timer_set
+        repeat x from 0 to XMAX
+            modifier := (||cnt / 1_000_000)
+            y := offset + sin(x * modifier) / div
+            repeat ys from y to y+10
+                repeat xs from x to x+10
+                    p := vga.Point(xs, ys) + 1
+                    if p > 255
+                        p := 0
+                    vga.Plot(xs, ys, p)
         iteration++
 
     Report(testtime, iteration)
@@ -297,17 +326,15 @@ PUB Demo_Sinewave(testtime) | iteration, x, y, modifier, offset, div
             y := offset + sin(x * modifier) / div
             vga.Plot(x, y, $FFFF)
 
-        vga.Update
+        vga.WaitVSync
         iteration++
         vga.Clear
 
     Report(testtime, iteration)
     return iteration
 
-PUB Demo_SeqText(testtime) | iteration, col, row, maxcol, maxrow, ch, st
+PUB Demo_SeqText(testtime) | iteration, col, row, maxcol, maxrow, ch, st, fg, bg
 ' Sequentially draws the whole font table to the screen, then random characters
-'    vga.FGColor(1)
-'    vga.BGColor(0)
     maxcol := (WIDTH/vga.FontWidth)-1
     maxrow := (HEIGHT/vga.FontHeight)-1
     ch := $00
@@ -322,8 +349,14 @@ PUB Demo_SeqText(testtime) | iteration, col, row, maxcol, maxrow, ch, st
                 ch++
                 if ch > $7F
                     ch := $00
-                vga.FGColor((?_rndseed >> 26) << 11 | (?_rndseed >> 25) << 5 | (?_rndseed >> 26))
-                vga.BGColor((?_rndseed >> 26) << 11 | (?_rndseed >> 25) << 5 | (?_rndseed >> 26))
+                fg++
+                if fg > 255
+                    fg := 0
+                bg--
+                if bg < 0
+                    bg := 255
+                vga.FGColor(fg)
+                vga.BGColor(bg)
                 vga.Position (col, row)
                 vga.Char (ch)
         vga.Update
@@ -332,10 +365,8 @@ PUB Demo_SeqText(testtime) | iteration, col, row, maxcol, maxrow, ch, st
     Report(testtime, iteration)
     return iteration
 
-PUB Demo_RndText(testtime) | iteration, col, row, maxcol, maxrow, ch, st
+PUB Demo_RndText(testtime) | iteration, col, row, maxcol, maxrow, ch, st, fg, bg
 
-    vga.FGColor(1)
-    vga.BGColor(0)
     maxcol := (WIDTH/vga.FontWidth)-1
     maxrow := (HEIGHT/vga.FontHeight)-1
     ch := $00
@@ -350,8 +381,14 @@ PUB Demo_RndText(testtime) | iteration, col, row, maxcol, maxrow, ch, st
                 ch++
                 if ch > $7F
                     ch := $00
-                vga.FGColor((?_rndseed >> 26) << 11 | (?_rndseed >> 25) << 5 | (?_rndseed >> 26))
-                vga.BGColor((?_rndseed >> 26) << 11 | (?_rndseed >> 25) << 5 | (?_rndseed >> 26))
+                fg++
+                if fg > 255
+                    fg := 0
+                bg--
+                if bg < 0
+                    bg := 255
+                vga.FGColor(fg)
+                vga.BGColor(bg)
                 vga.Position (col, row)
                 vga.Char (rnd(127))
         vga.Update
@@ -376,19 +413,20 @@ PUB Demo_TriWave(testtime) | iteration, x, y, ydir
             if y == 0
                 ydir := 1
             y := y + ydir
-            vga.Plot (x, y, $FFFF)
-        vga.Update
+            vga.Plot (x, y, 255)
+        vga.WaitVSync
         iteration++
         vga.Clear
 
     Report(testtime, iteration)
     return iteration
 
-PUB Demo_Wander(testtime) | iteration, x, y, d, c
+PUB Demo_Wander(testtime) | iteration, x, y, d, c, movestep
 ' Draws randomly wandering pixels
     _rndSeed := cnt
     x := XMAX/2
     y := YMAX/2
+    movestep := 2
 
     ser.str(string("Demo_Wander - "))
     _timer_set := testtime
@@ -397,22 +435,22 @@ PUB Demo_Wander(testtime) | iteration, x, y, d, c
     repeat while _timer_set
         case d := rnd(4)
             1:
-                x += 2
+                x += movestep
                 if x > XMAX
                     x := 0
             2:
-                x -= 2
+                x -= movestep
                 if x < 0
                     x := XMAX
             3:
-                y += 2
+                y += movestep
                 if y > YMAX
                     y := 0
             4:
-                y -= 2
+                y -= movestep
                 if y < 0
                     y := YMAX
-        c := (?_rndseed >> 26) << 11 | (?_rndseed >> 25) << 5 | (?_rndseed >> 26)
+        c := (?_rndseed >> 24)
         vga.Plot (x, y, c)
         vga.Update
         iteration++
@@ -436,7 +474,7 @@ PUB Sin(angle) | tmp
     asm
         shl     angle, #20
         qrotate ##100000, angle
-        getqy   tmp               'Can't getqy directly into result - too complex for inline asm
+        getqy   tmp
     endasm
     return tmp
 
@@ -448,8 +486,8 @@ PRI Report(testtime, iterations)
     ser.str(string(", Iterations/sec: "))
     ser.dec(iterations / (testtime/1000))
 
-    ser.str(string(", Iterations/ms: "))
-    Decimal( (iterations * 1_000) / testtime, 1_000)
+    ser.str(string(", ms/Iteration: "))
+    Decimal( (testtime * 1_000) / iterations, 1_000)
     ser.newline
 
 PRI Decimal(scaled, divisor) | whole[4], part[4], places, tmp
