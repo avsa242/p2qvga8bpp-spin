@@ -1,3 +1,16 @@
+{
+    --------------------------------------------
+    Filename: display.vga.bitmap-8bpp.spin2
+    Description: 8-bits per pixel bitmap VGA driver (320x200)
+    Author: Ray Allen
+    Modified by: Jesse Burt
+    Started: Apr 6, 2020
+    Updated: Apr 9, 2020
+    See end of file for terms of use.
+    --------------------------------------------
+    NOTE: This is a derivative of raycast5b_SpinDisplay2a.spin2,
+        originally written by Rayman/Ray Allen
+}
 #define VGABITMAP8BPP
 #include "lib.gfx.bitmap.spin2"
 
@@ -79,8 +92,6 @@ DisplayEntry
                         wrlut   y, x
                         add     x, #1
 .end
-                        'RJA:  Now, repeating every line to stretch in y direction
-                        'rdfast  ##640*1/64/2,m_buf'##DisplayBufferAddress   'RJA:1 line of bitmapset rdfast to wrap on bitmap  //RJA making 320x480 (for now)
 
                         rdlong  hsync_pin, ptra++
                         rdlong  red_pin, ptra++
@@ -91,20 +102,20 @@ DisplayEntry
 
                         setxfrq ##round(FSET)               'set transfer frequency to 25MHz
 
-                        'the next 4 lines may be commented out to bypass level scaling
+'the next 4 lines may be commented out to bypass level scaling
 
                         setcy   ##INTENSITY << 24           'r  set colorspace for rgb
                         setci   ##INTENSITY << 16           'g
                         setcq   ##INTENSITY << 08           'b
                         setcmod #%01_0_000_0                'enable colorspace conversion
 
-                        'RJA dacmodes changed for real P2
+'RJA dacmodes changed for real P2
                         cogid   mycogid
                         shl     mycogid, #8
                         or      dacmode_s, mycogid
                         or      dacmode_c, mycogid
 
-                        'RJA dacmodes changed for real P2
+'RJA dacmodes changed for real P2
                         wrpin   dacmode_s, hsync_pin        'enable dac modes in pins 0..3
                         wrpin   dacmode_c, red_pin
                         wrpin   dacmode_c, green_pin
@@ -114,10 +125,10 @@ DisplayEntry
                         dirh    green_pin
                         dirh    blue_pin
 
-                        '
-                        ' Field loop
-                        '
-field                   mov     x, #33'43                      'top blanks  XXX May need to be tweaked for your monitor
+'
+' Field loop
+'
+field                   mov     x, #33                      'top blanks  XXX May need to be tweaked for your monitor
                         call    #blank
                         mov     m_buf, framebuff_addr
                         mov     x, #480/2                   'set visible lines
@@ -176,4 +187,25 @@ y                       long    0
 m_buf                   long    0
 _ptr_palette            long    0
 mycogid                 long    0
+
+{
+    --------------------------------------------------------------------------------------------------------
+    TERMS OF USE: MIT License
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+    associated documentation files (the "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+    following conditions:
+
+    The above copyright notice and this permission notice shall be included in all copies or substantial
+    portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+    LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    --------------------------------------------------------------------------------------------------------
+}
 

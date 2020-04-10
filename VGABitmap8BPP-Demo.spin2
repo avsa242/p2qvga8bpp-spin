@@ -1,3 +1,14 @@
+{
+    --------------------------------------------
+    Filename: VGABitmap8BPP-Demo.spin2
+    Description: Demo of the 8bpp VGA bitmap driver
+    Author: Jesse Burt
+    Copyright (c) 2020
+    Started: Apr 6, 2020
+    Updated: Apr 10, 2020
+    See end of file for terms of use.
+    --------------------------------------------
+}
 CON
 
     _XTALFREQ   = 20_000_000
@@ -23,8 +34,8 @@ CON
     BPP         = 1
     BPL         = WIDTH * BPP
 
-    RX_PIN      = 63
-    TX_PIN      = 62
+    SER_RX      = cfg#SER_RX
+    SER_TX      = cfg#SER_TX
     SER_BAUD    = 2_000_000
     LED         = cfg#LED1
 
@@ -76,6 +87,12 @@ PUB Main | time_ms
     vga.ClearAll
 
     Demo_Bitmap (time_ms, $1_0000)
+    vga.ClearAll
+
+    Demo_Box (time_ms)
+    vga.ClearAll
+
+    Demo_BoxFilled (time_ms)
     vga.ClearAll
 
     Demo_LineSweepX(time_ms)
@@ -145,6 +162,34 @@ PUB Demo_Bitmap(testtime, bitmap_addr) | iteration
     repeat while _timer_set
         vga.Bitmap (bitmap_addr, BUFFSZ, 0)
         vga.Update
+        iteration++
+
+    Report(testtime, iteration)
+    return iteration
+
+PUB Demo_Box (testtime) | iteration, c
+' Draws random lines
+    ser.str(string("Demo_Box - "))
+    _timer_set := testtime
+    iteration := 0
+
+    repeat while _timer_set
+        c := rnd(255)
+        vga.Box (rnd(XMAX), rnd(YMAX), rnd(XMAX), rnd(YMAX), c, FALSE)
+        iteration++
+
+    Report(testtime, iteration)
+    return iteration
+
+PUB Demo_BoxFilled (testtime) | iteration, c, x1, y1, x2, y2
+' Draws random lines
+    ser.str(string("Demo_BoxFilled - "))
+    _timer_set := testtime
+    iteration := 0
+
+    repeat while _timer_set
+        c := rnd(255)
+        vga.Box (rnd(XMAX), rnd(YMAX), rnd(XMAX), rnd(YMAX), c, TRUE)
         iteration++
 
     Report(testtime, iteration)
@@ -522,7 +567,7 @@ PRI cog_Timer | time_left
 PUB Setup
 
     clkset(_clkmode, _clkfreq)
-    repeat until ser.StartRXTX(rx_pin, tx_pin, 0, ser_baud)
+    repeat until ser.StartRXTX(SER_RX, SER_TX, 0, SER_BAUD)
     ser.clear
     ser.printf("Serial terminal started - p2 @ %dMHz\n", clkfreq/1000000)
     SetupPalette
@@ -570,4 +615,25 @@ PUB SetupPalette | i, r, g, b, c
                 b := 255
 
 #include "lib.utility.spin2"
+
+{
+    --------------------------------------------------------------------------------------------------------
+    TERMS OF USE: MIT License
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+    associated documentation files (the "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+    following conditions:
+
+    The above copyright notice and this permission notice shall be included in all copies or substantial
+    portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+    LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    --------------------------------------------------------------------------------------------------------
+}
 
