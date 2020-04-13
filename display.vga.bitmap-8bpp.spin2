@@ -5,7 +5,7 @@
     Author: Ray Allen
     Modified by: Jesse Burt
     Started: Apr 6, 2020
-    Updated: Apr 9, 2020
+    Updated: Apr 12, 2020
     See end of file for terms of use.
     --------------------------------------------
     NOTE: This is a derivative of raycast5b_SpinDisplay2a.spin2,
@@ -16,7 +16,7 @@
 
 CON
 
-    _CLKFREQ    = 160_000_000                               ' Must match CLOCKFREQ symbol in parent object
+    _CLKFREQ    = 250_000_000                               ' Must match CLOCKFREQ symbol in parent object
     FCLK        = _CLKFREQ
     FPIX        = 25_000_000.0/2.0
     FSET        = (FPIX / FCLK * 2.0) * float($4000_0000)
@@ -85,8 +85,7 @@ PUB DrawTo(addr)
 PUB Update
 ' Write the draw buffer to the display
 '   NOTE: This is only required when using double-buffering
-'    bytemove(_ptr_framebuffer, _ptr_drawbuffer, _buff_sz)   '25/sec
-    longmove(_ptr_framebuffer, _ptr_drawbuffer, _buff_sz/4) '47/sec
+    longmove(_ptr_framebuffer, _ptr_drawbuffer, _buff_sz/4)
 
 PUB WaitVSync
 ' Wait for vertical sync signal to be high
