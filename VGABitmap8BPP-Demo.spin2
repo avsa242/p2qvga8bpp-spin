@@ -5,7 +5,7 @@
     Author: Jesse Burt
     Copyright (c) 2020
     Started: Apr 6, 2020
-    Updated: Apr 10, 2020
+    Updated: Jun 6, 2020
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -177,9 +177,9 @@ PUB Demo_BouncingBall(testtime, radius) | iteration, bx, by, dx, dy
     repeat while _timer_set
         bx += dx
         by += dy
-        if (by =< radius OR by => HEIGHT - radius)          'If we reach the top or bottom of the screen,
+        if (by =< radius OR by => YMAX - radius)          'If we reach the top or bottom of the screen,
             dy *= -1                                        ' change direction
-        if (bx =< radius OR bx => WIDTH - radius)           'Ditto with the left or right sides
+        if (bx =< radius OR bx => XMAX - radius)           'Ditto with the left or right sides
             dx *= -1
 
         vga.Circle (bx, by, radius, $FFFF)
@@ -355,7 +355,7 @@ PUB Demo_Shadebobs(testtime) | iteration, x, y, xs, ys, p, offset, div, modifier
 
     repeat while _timer_set
         repeat x from 0 to XMAX
-            modifier := (||cnt / 1_000_000)
+            modifier := (abs(cnt) / 1_000_000)
             y := offset + sin(x * modifier) / div
             repeat ys from y to y+10
                 repeat xs from x to x+10
@@ -380,7 +380,7 @@ PUB Demo_Sinewave(testtime) | iteration, x, y, modifier, offset, div
 
     repeat while _timer_set
         repeat x from 0 to XMAX
-            modifier := (||cnt / 1_000_000)           ' Use system counter as modifier
+            modifier := (abs(cnt) / 1_000_000)           ' Use system counter as modifier
             y := offset + sin(x * modifier) / div
             vga.Plot(x, y, $FFFF)
 
@@ -391,10 +391,8 @@ PUB Demo_Sinewave(testtime) | iteration, x, y, modifier, offset, div
     Report(testtime, iteration)
     return iteration
 
-PUB Demo_SeqText(testtime) | iteration, col, row, maxcol, maxrow, ch, st, fg, bg
+PUB Demo_SeqText(testtime) | iteration, col, row, ch, fg, bg
 ' Sequentially draws the whole font table to the screen
-    maxcol := (WIDTH/vga.FontWidth)-1
-    maxrow := (HEIGHT/vga.FontHeight)-1
     ch := $00
 
     ser.str(string("Demo_SeqText - "))
@@ -402,52 +400,39 @@ PUB Demo_SeqText(testtime) | iteration, col, row, maxcol, maxrow, ch, st, fg, bg
     iteration := 0
 
     repeat while _timer_set
-        repeat row from 0 to maxrow
-            repeat col from 0 to maxcol
-                ch++
-                if ch > $7F
-                    ch := $00
-                fg++
-                if fg > 255
-                    fg := 0
-                bg--
-                if bg < 0
-                    bg := 255
-                vga.FGColor(fg)
-                vga.BGColor(bg)
-                vga.Position (col, row)
-                vga.Char (ch)
+        ch++
+        if ch > $7F
+            ch := $00
+        fg++
+        if fg > 255
+            fg := 0
+        bg--
+        if bg < 0
+            bg := 255
+        vga.FGColor(fg)
+        vga.BGColor(bg)
+        vga.Char (ch)
         iteration++
 
     Report(testtime, iteration)
     return iteration
 
-PUB Demo_RndText(testtime) | iteration, col, row, maxcol, maxrow, ch, st, fg, bg
+PUB Demo_RndText(testtime) | iteration, col, row, fg, bg
 ' Draws random characters to the screen
-    maxcol := (WIDTH/vga.FontWidth)-1
-    maxrow := (HEIGHT/vga.FontHeight)-1
-    ch := $00
-
     ser.str(string("Demo_RndText - "))
     _timer_set := testtime
     iteration := 0
 
     repeat while _timer_set
-        repeat row from 0 to maxrow
-            repeat col from 0 to maxcol
-                ch++
-                if ch > $7F
-                    ch := $00
-                fg++
-                if fg > 255
-                    fg := 0
-                bg--
-                if bg < 0
-                    bg := 255
-                vga.FGColor(fg)
-                vga.BGColor(bg)
-                vga.Position (col, row)
-                vga.Char (rnd(127))
+        fg++
+        if fg > 255
+            fg := 0
+        bg--
+        if bg < 0
+            bg := 255
+        vga.FGColor(fg)
+        vga.BGColor(bg)
+        vga.Char (rnd(127))
         iteration++
 
     Report(testtime, iteration)
@@ -471,8 +456,8 @@ PUB Demo_TriWave(testtime) | iteration, x, y, ydir
             y := y + ydir
             vga.Plot (x, y, 255)
         vga.WaitVSync
-        iteration++
         vga.Clear
+        iteration++
 
     Report(testtime, iteration)
     return iteration
@@ -558,7 +543,7 @@ PRI Decimal(scaled, divisor) | whole[4], part[4], places, tmp
         tmp /= 10
         places++
     until tmp == 1
-    part := int.DecZeroed(||(scaled // divisor), places)
+    part := int.DecZeroed(abs(scaled // divisor), places)
 
     ser.Dec (whole)
     ser.Char (".")
