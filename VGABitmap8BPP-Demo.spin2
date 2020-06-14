@@ -130,9 +130,9 @@ PUB Demo_BouncingBall(testtime, radius) | iteration, bx, by, dx, dy
     repeat while _timer_set
         bx += dx
         by += dy
-        if (by =< radius OR by => YMAX - radius)          'If we reach the top or bottom of the screen,
+        if (by <= radius OR by >= YMAX - radius)          'If we reach the top or bottom of the screen,
             dy *= -1                                        ' change direction
-        if (bx =< radius OR bx => XMAX - radius)           'Ditto with the left or right sides
+        if (bx <= radius OR bx >= XMAX - radius)           'Ditto with the left or right sides
             dx *= -1
 
         vga.Circle (bx, by, radius, $FFFF)
