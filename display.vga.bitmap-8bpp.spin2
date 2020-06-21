@@ -18,7 +18,7 @@ CON
 
     _CLKFREQ    = 250_000_000                               ' Must match CLOCKFREQ symbol in parent object
     FCLK        = _CLKFREQ
-    FPIX        = 25_000_000.0/2.0
+    FPIX        = 25_175_000.0/2.0
     FSET        = (FPIX / FCLK * 2.0) * float($4000_0000)
     BYTESPERPX  = 1
     BYTESPERLN  = 320
@@ -30,7 +30,7 @@ CON
     VSYNC_PAR   = 4
     PTR_FB_PAR  = 5
 
-    INTENSITY   = 80                                        ' 0..128
+    INTENSITY   = 127                                        ' 0..128
 
 OBJ
 
@@ -68,6 +68,10 @@ PUB Stop()
     if _cog
         cogstop(_cog-1)
 
+PUB Defaults()
+
+    SetTimings(33, 10, 16, 96, 96, 640)
+
 PUB Address(addr)
 ' Set address of display buffer
 '   NOTE: Also sets address of (optional) offscreen buffer to the same address
@@ -84,6 +88,15 @@ PUB DrawTo(addr)
 '       to subsequently be copied to the display or "live" buffer,
 '       once a complete frame is rendered.
     _ptr_drawbuffer := addr
+
+PUB SetTimings(vf, vb, bs{hf}, sn{hs}, bv{hb}, vi{hv})
+
+    _vf := vf
+    _vb := vb
+    _bs := STREAMER_SETUP | (1 << streamer.LUTBASE) + bs/2
+    _sn := STREAMER_SETUP | (1 << streamer.LUTBASE) + sn/2
+    _bv := STREAMER_SETUP | (1 << streamer.LUTBASE) + bv/2
+    _vi := STREAMER_SETUP | (1 << streamer.LUTBASE) + vi/2
 
 PUB Update()
 ' Write the draw buffer to the display
@@ -137,7 +150,7 @@ DisplayEntry
 
 'RJA dacmodes changed for real P2
                         wrpin   dacmode_s, hsync_pin        'enable dac modes in pins 0..3
-                        wrpin   dacmode_c, red_pin
+                       wrpin   dacmode_c, red_pin
                         wrpin   dacmode_c, green_pin
                         wrpin   dacmode_c, blue_pin
                         dirh    hsync_pin
@@ -148,7 +161,7 @@ DisplayEntry
 '
 ' Field loop
 '
-field                   mov     x, #33                      'top blanks  XXX May need to be tweaked for your monitor
+field                   mov     x, _vb                      'top blanks  XXX May need to be tweaked for your monitor
                         call    #blank
                         mov     m_buf, framebuff_addr
                         mov     x, #480/2                   'set visible lines
@@ -161,7 +174,7 @@ lineloop                call    #hsync                      'do horizontal sync
                         add     m_buf, #320
                         djnz    x, #lineloop                'another line?
 
-                        mov     x, #10                      'bottom blanks
+                        mov     x, _vf                      'bottom blanks
                         call    #blank
 
                         drvnot  vsync_pin                   'sync on
@@ -176,12 +189,12 @@ lineloop                call    #hsync                      'do horizontal sync
 ' Subroutines
 '
 blank                   call    #hsync                      'blank lines
-                        xcont   m_vi, #0
+                        xcont   _vi, #0
             _ret_       djnz    x, #blank
 
-hsync                   xcont   m_bs, #0                    'horizontal sync
-                        xcont   m_sn, #1
-            _ret_       xcont   m_bv, #0
+hsync                   xcont   _bs, #0                    'horizontal sync
+                        xcont   _sn, #1
+            _ret_       xcont   _bv, #0
 
 '
 ' Initialized data
@@ -189,10 +202,13 @@ hsync                   xcont   m_bs, #0                    'horizontal sync
 dacmode_s               long    smartpins.DAC_123OHM_3V3 | smartpins.OUTPUT_ENABLED ' HSync
 dacmode_c               long    smartpins.DAC_75OHM_2V0 | smartpins.OUTPUT_ENABLED  ' R, G, B
 
-m_bs                    long    STREAMER_SETUP | (1 << streamer.LUTBASE) + 16/2     ' Before sync
-m_sn                    long    STREAMER_SETUP | (1 << streamer.LUTBASE) + 96/2     ' Sync
-m_bv                    long    STREAMER_SETUP | (1 << streamer.LUTBASE) + 96/2     ' Before visible
-m_vi                    long    STREAMER_SETUP | (1 << streamer.LUTBASE) + 640/2    ' Visible
+_vf                     long    0'33
+_vb                     long    0'10
+_bs                     long    0'STREAMER_SETUP | (1 << streamer.LUTBASE) + 16/2     ' Before sync
+_sn                     long    0'STREAMER_SETUP | (1 << streamer.LUTBASE) + 96/2     ' Sync
+_bv                     long    0'STREAMER_SETUP | (1 << streamer.LUTBASE) + 96/2     ' Before visible
+_vi                     long    0'STREAMER_SETUP | (1 << streamer.LUTBASE) + 640/2    ' Visible
+
 m_rf                    long    STREAMER_SETUP | (8 << streamer.LUTBASE) + 640/2    ' Visible RLONG 8BPP LUT
 
 framebuff_addr          long    0
