@@ -55,12 +55,12 @@ OBJ
 
 PUB Main() | time_ms
 
-    vga.SetTimings(33, 10, 16, 96, 48, 640)
+    vga.SetTimings(10, 33, 16, 96, 48, 640)
     Setup()
     vga.clear()
 
     Demo_Greet()
-    time.Sleep (8)
+    time.Sleep (5)
     vga.clearall()
 
     time_ms := 10_000
