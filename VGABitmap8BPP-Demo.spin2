@@ -5,7 +5,7 @@
     Author: Jesse Burt
     Copyright (c) 2020
     Started: Apr 6, 2020
-    Updated: Jun 6, 2020
+    Updated: Jun 22, 2020
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -48,13 +48,14 @@ OBJ
     cfg         : "core.con.boardcfg.p2eval"
     ser         : "com.serial.terminal.ansi"
     time        : "time"
-    'io          : "io"
+    io          : "io"
     vga         : "display.vga.bitmap-8bpp"
     int         : "string.integer"
     fnt         : "font.5x8"
 
 PUB Main() | time_ms
 
+    vga.SetTimings(33, 10, 16, 96, 48, 640)
     Setup()
     vga.clear()
 
@@ -114,7 +115,7 @@ PUB Main() | time_ms
     time.Sleep(2)
     vga.clearall()
 
-    'FlashLED(LED, 100)
+    FlashLED(LED, 100)
 
 PUB Demo_BouncingBall(testtime, radius) | iteration, bx, by, dx, dy
 ' Draws a simple ball bouncing off screen edges
@@ -504,7 +505,6 @@ PUB Setup()
     ser.printf("Serial terminal started - p2 @ %dMHz\n", clkfreq/1000000)
     SetupPalette()
 
-    vga.SetTimings(33, 21, 16, 96, 48, 640)
     if vga.start(VGA_BASEPIN, @_framebuffer, @_palette, WIDTH, HEIGHT)
         ser.printf("VGA 8bpp driver started\n")
         vga.FontAddress(fnt.BaseAddr())
@@ -548,7 +548,7 @@ PUB SetupPalette() | i, r, g, b, c
                 g := 255
                 b := 255
 
-'#include "lib.utility.spin2"
+#include "lib.utility.spin2"
 
 {
     --------------------------------------------------------------------------------------------------------
