@@ -5,7 +5,7 @@
     Author: Ray Allen
     Modified by: Jesse Burt
     Started: Apr 6, 2020
-    Updated: Jun 14, 2020
+    Updated: Jun 22, 2020
     See end of file for terms of use.
     --------------------------------------------
     NOTE: This is a derivative of raycast5b_SpinDisplay2a.spin2,
@@ -69,7 +69,7 @@ PUB Stop()
         cogstop(_cog-1)
 
 PUB Defaults()
-
+' Default timings for 640x480 signalling
     SetTimings(10, 33, 16, 96, 48, 640)
 
 PUB Address(addr)
@@ -156,7 +156,7 @@ DisplayEntry
 
 'RJA dacmodes changed for real P2
                         wrpin   dacmode_s, hsync_pin        'enable dac modes in pins 0..3
-                       wrpin   dacmode_c, red_pin
+                        wrpin   dacmode_c, red_pin
                         wrpin   dacmode_c, green_pin
                         wrpin   dacmode_c, blue_pin
                         dirh    hsync_pin
@@ -167,7 +167,7 @@ DisplayEntry
 '
 ' Field loop
 '
-field                   mov     x, _vb                      'top blanks  XXX May need to be tweaked for your monitor
+field                   mov     x, _vb                      'top blanks
                         call    #blank
                         mov     m_buf, framebuff_addr
                         mov     x, #480/2                   'set visible lines
