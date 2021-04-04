@@ -3,9 +3,9 @@
     Filename: VGABitmap8BPP-Demo.spin2
     Description: Demo of the 8bpp VGA bitmap driver
     Author: Jesse Burt
-    Copyright (c) 2020
+    Copyright (c) 2021
     Started: Apr 6, 2020
-    Updated: Jul 14, 2020
+    Updated: Apr 4, 2021
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -135,7 +135,7 @@ PUB Demo_BouncingBall(testtime, radius) | iteration, bx, by, dx, dy
         if (bx <= radius OR bx >= XMAX - radius)           'Ditto with the left or right sides
             dx *= -1
 
-        vga.circle (bx, by, radius, $FFFF)
+        vga.circle(bx, by, radius, vga#MAX_COLOR, false)
         vga.waitvsync()
         iteration++
         vga.clear()
@@ -191,7 +191,7 @@ PUB Demo_Circle(testtime) | iteration, x, y, r, c
         y := rnd(YMAX)
         r := rnd(YMAX/2)
         c := rnd(vga.MAX_COLOR)
-        vga.circle (x, y, r, c)
+        vga.circle(x, y, r, c, false)
         iteration++
 
     report(testtime, iteration)
