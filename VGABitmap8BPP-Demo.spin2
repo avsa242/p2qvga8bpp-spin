@@ -5,7 +5,7 @@
     Author: Jesse Burt
     Copyright (c) 2021
     Started: Apr 6, 2020
-    Updated: Apr 4, 2021
+    Updated: Oct 18, 2021
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -149,7 +149,7 @@ PUB Demo_Bitmap(testtime, bitmap_addr) | iteration
     iteration := 0
 
     repeat while _timer_set
-        vga.bitmap (bitmap_addr, BUFFSZ, 0)
+        vga.bitmap (bitmap_addr, 0, 0, XMAX, YMAX)
         iteration++
 
     report(testtime, iteration)
@@ -269,7 +269,7 @@ PUB Demo_MEMScroller(testtime, start_addr, end_addr) | iteration, pos, st, en
         pos += BPL
         if pos > end_addr
             pos := start_addr
-        vga.bitmap (pos, BUFFSZ, 0)
+        vga.bitmap (pos, 0, 0, XMAX, YMAX)
         iteration++
 
     report(testtime, iteration)
