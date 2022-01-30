@@ -4,7 +4,7 @@
     Description: 8-bits per pixel bitmap VGA driver (320x240)
     Modified by: Jesse Burt
     Started: Apr 6, 2020
-    Updated: Jan 25, 2022
+    Updated: Jan 30, 2022
     See end of file for terms of use.
     --------------------------------------------
     NOTE: This is based on raycast5b_SpinDisplay2a.spin2,
@@ -35,9 +35,6 @@ OBJ
 VAR
 
     long _cog, _params[6]
-    long _disp_width, _disp_height, _disp_xmax, _disp_ymax, _buff_sz
-    long _ptr_framebuffer, _ptr_drawbuffer
-    word _bytesperln
     byte _vsync_pin
 
 PUB Start(pinbase, ptr_framebuffer, ptr_palette, WIDTH, HEIGHT): okay
