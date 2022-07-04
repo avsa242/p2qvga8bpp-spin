@@ -28,7 +28,7 @@ CON
     SER_BAUD        = 2_000_000
     LED             = cfg.LED1
 
-    VGA_BASEPIN     = 0                                     ' 0, 8, 16, 24, 32, 40, 48
+    VGA_BASEPIN     = 32                                     ' 0, 8, 16, 24, 32, 40, 48
 '                                                           Works with all basepins on the P2ES except 56
 ' --
 
@@ -60,7 +60,7 @@ PUB Main() | time_ms
 
     demo_greet()
     time.sleep (5)
-    vga.clearall()
+    vga.clear()
 
     time_ms := 10_000
 
@@ -68,51 +68,51 @@ PUB Main() | time_ms
     demo_shadebobs (time_ms)
 
     demo_sinewave (time_ms)
-    vga.clearall()
+    vga.clear()
 
     demo_triwave (time_ms)
-    vga.clearall()
+    vga.clear()
 
     demo_memscroller(time_ms, $0000, $7_FFFF)
-    vga.clearall()
+    vga.clear()
 
     demo_bitmap (time_ms, $1_0000)
-    vga.clearall()
+    vga.clear()
 
     demo_box (time_ms)
-    vga.clearall()
+    vga.clear()
 
     demo_boxfilled (time_ms)
-    vga.clearall()
+    vga.clear()
 
     demo_linesweepx(time_ms)
-    vga.clearall()
+    vga.clear()
 
     demo_linesweepy(time_ms)
-    vga.clearall()
+    vga.clear()
 
     demo_line (time_ms)
-    vga.clearall()
+    vga.clear()
 
     demo_plot (time_ms)
-    vga.clearall()
+    vga.clear()
 
     demo_bouncingball (time_ms, 5)
-    vga.clearall()
+    vga.clear()
 
     demo_circle(time_ms)
-    vga.clearall()
+    vga.clear()
 
     demo_wander (time_ms)
-    vga.clearall()
+    vga.clear()
 
     demo_seqtext (time_ms)
-    vga.clearall()
+    vga.clear()
 
     demo_rndtext (time_ms)
 
     waitms(2000)
-    vga.clearall()
+    vga.clear()
 
     flashled(LED, 100)
 
