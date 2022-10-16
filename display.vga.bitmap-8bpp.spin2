@@ -4,7 +4,7 @@
     Description: 8-bits per pixel bitmap VGA driver (320x240)
     Modified by: Jesse Burt
     Started: Apr 6, 2020
-    Updated: Oct 6, 2022
+    Updated: Oct 16, 2022
     See end of file for terms of use.
     --------------------------------------------
     NOTE: This is based on raycast5b_SpinDisplay2a.spin2,
@@ -66,7 +66,7 @@ PUB stop()
 
 PUB defaults()
 ' Default timings for 640x480 signalling
-    SetTimings(10, 33, 16, 96, 48, 640)
+    set_timings(10, 33, 16, 96, 48, 640)
 
 PUB address(addr)
 ' Set address of display buffer

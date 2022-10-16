@@ -3,9 +3,9 @@
     Filename: VGABitmap8BPP-Demo.spin2
     Description: Demo of the 8bpp VGA bitmap driver
     Author: Jesse Burt
-    Copyright (c) 2021
+    Copyright (c) 2022
     Started: Apr 6, 2020
-    Updated: Oct 18, 2021
+    Updated: Oct 16, 2022
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -38,15 +38,15 @@ VAR
 
 OBJ
 
-    cfg : "core.con.boardcfg.p2eval"
+    cfg : "boardcfg.p2eval"
     ser : "com.serial.terminal.ansi"
     vga : "display.vga.bitmap-8bpp"
     fnt : "font.5x8"
     math: "math.int"
 
-PUB Main() | time_ms
+PUB main() | time_ms
 
-    vga.settimings(10, 33, 16, 96, 48, 640)
+    vga.set_timings(10, 33, 16, 96, 48, 640)
     setup()
     vga.clear()
 
@@ -127,7 +127,7 @@ PUB Demo_BouncingBall(testtime, radius) | iteration, bx, by, dx, dy
             dx *= -1
 
         vga.circle(bx, by, radius, vga#MAX_COLOR, false)
-        vga.waitvsync()
+        vga.wait_vsync()
         iteration++
         vga.clear()
 
@@ -318,7 +318,7 @@ PUB Demo_Sinewave(testtime) | iteration, x, y, modifier, offset, div
             y := offset + math.sin(x * modifier) / div
             vga.plot(x, y, vga.MAX_COLOR)
 
-        vga.waitvsync()
+        vga.wait_vsync()
         iteration++
         vga.clear()
 
@@ -385,7 +385,7 @@ PUB Demo_TriWave(testtime) | iteration, x, y, ydir
                 ydir := 1
             y := y + ydir
             vga.plot(x, y, vga.MAX_COLOR)
-        vga.waitvsync()
+        vga.wait_vsync()
         vga.clear()
         iteration++
 
@@ -453,7 +453,7 @@ PRI Setup()
 
     vga.start(VGA_BASEPIN, WIDTH, HEIGHT, @_disp_buff)
     ser.printf("VGA 8bpp driver started\n\r")
-    vga.fontaddress(fnt.baseaddr())
+    vga.fontaddress(fnt.ptr())
     vga.fontscale(1)
     vga.fontspacing(1, 0)
     vga.fontsize(fnt.WIDTH, fnt.HEIGHT)
@@ -466,7 +466,7 @@ PRI SetupPalette() | i, r, g, b, c, ptr_pal
     r := 0
     g := 0
     b := 0
-    ptr_pal := vga.paletteptr()
+    ptr_pal := vga.palette_ptr()
     repeat i from 0 to vga.MAX_COLOR
         c := 0 | (r << 16) | (g << 8) | b
         long[ptr_pal][i] := c
@@ -493,25 +493,23 @@ PRI SetupPalette() | i, r, g, b, c, ptr_pal
                 g := 255
                 b := 255
 
-
+DAT
 {
-    --------------------------------------------------------------------------------------------------------
-    TERMS OF USE: MIT License
+Copyright 2022 Jesse Burt
 
-    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
-    associated documentation files (the "Software"), to deal in the Software without restriction, including
-    without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
-    following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-    The above copyright notice and this permission notice shall be included in all copies or substantial
-    portions of the Software.
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
-    LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-    --------------------------------------------------------------------------------------------------------
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 }
 
