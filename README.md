@@ -19,7 +19,7 @@ P2/SPIN2:
 * p2-spin-standard-library
 * 1 extra core/cog for the PASM engine
 * 76.8kBytes RAM for single-buffered display, or 153.6kBytes for double-buffered
-* lib.gfx.bitmap.spin2 (provided by p2-spin-standard-library)
+* graphics.common.spin2h (provided by p2-spin-standard-library)
 
 ## Compiler Compatibility
 
