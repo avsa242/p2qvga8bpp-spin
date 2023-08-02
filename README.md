@@ -9,8 +9,9 @@ This is a P2X8C4M64P/Propeller 2 QVGA display engine.
 
 * QVGA 320x240 resolution (signalled as 640x480, with pixel-doubling), 8bpp color
 * Integration with generic bitmap graphics library
-* Optional double-buffering
-* Optional wait for VSync signal
+* Double-buffering (optional)
+* Wait for vsync, or current vsync status (function calls)
+* Display intensity
 * Includes simple video timing adjustment utility
 
 
