@@ -3,9 +3,9 @@
     Filename: VGAbitmap8BPP-Demo.spin2
     Description: Demo of the 8bpp VGA bitmap driver
     Author: Jesse Burt
-    Copyright (c) 2022
+    Copyright (c) 2023
     Started: Apr 6, 2020
-    Updated: Nov 26, 2022
+    Updated: Aug 2, 2023
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -16,36 +16,25 @@ CON
 
 ' -- User-modifiable constants
     SER_BAUD        = 2_000_000
-    LED             = cfg.LED1
-
-    VGA_BASEPIN     = 48                        ' 0, 8, 16, 24, 32, 40, 48
 ' --
-    WIDTH           = 320
-    HEIGHT          = 240
-    XMAX            = WIDTH-1
-    YMAX            = HEIGHT-1
-    BUFFSZ          = WIDTH * HEIGHT
-    BPP             = 1
-    BPL             = WIDTH * BPP
 
 VAR
 
     long _stack_timer[50]
     long _timer_set
-    byte _disp_buff[BUFFSZ]
     byte _timer_cog
 
 OBJ
 
-    cfg : "boardcfg.p2eval"
-    ser : "com.serial.terminal.ansi"
-    vga : "display.vga.bitmap-8bpp"
-    fnt : "font.5x8"
-    math: "math.int"
+    cfg:    "boardcfg.p2eval"
+    ser:    "com.serial.terminal.ansi"
+    fnt:    "font.5x8"
+    math:   "math.int"
+    vga:    "display.vga.bitmap-8bpp" | BASEPIN=32, VF=10, VB=33, HF=16, HS=96, HB=48, HV=640
+    ' NOTE: Timings can also be changed with set_timings() (before calling driver start() )
 
 PUB main() | time_ms
 
-    vga.set_timings(10, 33, 16, 96, 48, 640)
     setup()
     vga.clear()
 
@@ -424,7 +413,7 @@ PUB demo_wander(testtime) | iteration, x, y, d, c, movestep
 
     report(testtime, iteration)
 
-PUB Report(testtime, iterations) | msec
+PUB report(testtime, iterations) | msec
 ' Display performance results
     msec := (testtime * 1_000) / iterations
     ser.printf(@"Total iterations: %d, iterations/sec: %d, ms/iteration: %d.%03.3d", {
@@ -448,53 +437,27 @@ PUB setup()
     ser.start(SER_BAUD)
     ser.clear()
     ser.printf("Serial terminal started - p2 @ %dMHz\n\r", clkfreq/1000000)
-    setup_palette()
 
-    vga.start(VGA_BASEPIN, WIDTH, HEIGHT, @_disp_buff)
-    ser.printf("VGA 8bpp driver started\n\r")
-    vga.font_addr(fnt.ptr())
-    vga.font_scl(1)
-    vga.font_spacing(1, 0)
-    vga.font_sz(fnt.WIDTH, fnt.HEIGHT)
+    vga.defaults()
+    vga.start()
+    ser.strln(@"VGA 8bpp driver started")
+    vga.set_font(fnt.ptr(), fnt.setup())
+    vga.char_attrs(vga.TERMINAL)
     vga.clear()
 
     _timer_cog := cogspin(NEWCOG, cog_timer(), @_stack_timer)
 
-PUB setup_palette() | i, r, g, b, c, ptr_pal
-' Set up palette
-    r := 0
-    g := 0
-    b := 0
-    ptr_pal := vga.palette_ptr()
-    repeat i from 0 to vga.MAX_COLOR
-        c := 0 | (r << 16) | (g << 8) | b
-        long[ptr_pal][i] := c
+CON
 
-        case i
-            0..63:
-                r += 4
-                g := 0
-                b := 0
-            64..127:
-                r := 0
-                g += 4
-                b := 0
-            128..191:
-                r := 0
-                g := 0
-                b += 4
-            192..253:
-                r += 4
-                g += 4
-                b := 0
-            254..255:
-                r := 255
-                g := 255
-                b := 255
+    WIDTH   = vga.WIDTH
+    HEIGHT  = vga.HEIGHT
+    XMAX    = WIDTH-1
+    YMAX    = HEIGHT-1
+    BPL     = WIDTH
 
 DAT
 {
-Copyright 2022 Jesse Burt
+Copyright 2023 Jesse Burt
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,
