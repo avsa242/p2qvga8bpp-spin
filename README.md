@@ -28,10 +28,8 @@ P2/SPIN2:
 
 | Processor | Language | Compiler               | Backend      | Status                |
 |-----------|----------|------------------------|--------------|-----------------------|
-| P1        | SPIN1    | FlexSpin (6.2.1)       | Bytecode     | UNSUPPORTED           |
-| P1        | SPIN1    | FlexSpin (6.2.1)       | Native/PASM  | UNSUPPORTED           |
-| P2        | SPIN2    | FlexSpin (6.2.1)       | NuCode       | FTBFS                 |
-| P2        | SPIN2    | FlexSpin (6.2.1)       | Native/PASM2 | OK                    |
+| P2        | SPIN2    | FlexSpin (6.5.0)       | NuCode       | FTBFS                 |
+| P2        | SPIN2    | FlexSpin (6.5.0)       | Native/PASM2 | OK                    |
 
 (other versions or toolchains not listed are __not supported__, and _may or may not_ work)
 
