@@ -1,16 +1,18 @@
 {
-    --------------------------------------------
-    Filename: display.vga.bitmap-8bpp.spin2
-    Description: 8-bits per pixel bitmap VGA driver
+----------------------------------------------------------------------------------------------------
+    Filename:       display.vga.bitmap-8bpp.spin2
+    Description:    8-bits per pixel bitmap VGA driver
         * QVGA (320x240 - signalled as 640x480)
-    Modified by: Jesse Burt
-    Started: Apr 6, 2020
-    Updated: Oct 6, 2023
-    See end of file for terms of use.
-    --------------------------------------------
+    Author:         Jesse Burt
+    Started:        Apr 6, 2020
+    Updated:        Jul 6, 2024
+    Copyright (c) 2024 - See end of file for terms of use.
+----------------------------------------------------------------------------------------------------
+
     NOTE: This is based on raycast5b_SpinDisplay2a.spin2,
         originally written by Rayman/Ray Allen
 }
+
 #define MEMMV_NATIVE bytemove
 #include "graphics.common.spin2h"
 #ifdef GFX_DIRECT
@@ -155,6 +157,16 @@ PUB point(x, y): pix_clr
     y := 0 #> y <# _disp_ymax
 
     return byte[_ptr_drawbuffer][x + (y * _disp_width)]
+
+PUB set_palette(p_pal) | src, dest, r, g, b
+' Set up the driver with a custom palette
+'   p_pal:  pointer to custom palette (768 bytes, 256 entries of RGB888 words each)
+    dest := 0
+    repeat 256
+        r := byte[p_pal++]
+        g := byte[p_pal++]
+        b := byte[p_pal++]
+        _palette[dest++] := 0 | (r << 16) | (g << 8) | b
 
 PUB set_timings(vfront, vback, hfront, hsync, hback, hvisible)
 ' Set video timings
