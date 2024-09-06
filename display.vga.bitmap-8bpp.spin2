@@ -5,7 +5,7 @@
         * QVGA (320x240 - signalled as 640x480)
     Author:         Jesse Burt
     Started:        Apr 6, 2020
-    Updated:        Jul 6, 2024
+    Updated:        Sep 6, 2024
     Copyright (c) 2024 - See end of file for terms of use.
 ----------------------------------------------------------------------------------------------------
 
@@ -21,22 +21,11 @@
 
 CON
 
-    PIX_CLK     = 25_175_000
-    BYTESPERPX  = 1
-    MAX_COLOR   = 255
-    HSYNC_PAR   = 0
-    RED_PAR     = 1
-    GREEN_PAR   = 2
-    BLUE_PAR    = 3
-    VSYNC_PAR   = 4
-    PTR_FB_PAR  = 5
-
-
-    { default I/O settings - can be overridden in the parent object }
+    { default I/O settings - these can be overridden in the parent object }
+    BASEPIN     = 0
+    INTENSITY   = 127                           ' 0..127
     WIDTH       = 320                           ' only 320 supported
     HEIGHT      = 240                           ' only 240 supported
-    BASEPIN     = 0
-    INTENSITY   = 127 <# 127                    ' 0..127
 
     { default timings }
     VF          = 10
@@ -52,10 +41,22 @@ CON
     CENTERX     = WIDTH/2
     CENTERY     = HEIGHT/2
 
+
+    PIX_CLK     = 25_175_000
+    BYTESPERPX  = 1
+    MAX_COLOR   = 255
+    HSYNC_PAR   = 0
+    RED_PAR     = 1
+    GREEN_PAR   = 2
+    BLUE_PAR    = 3
+    VSYNC_PAR   = 4
+    PTR_FB_PAR  = 5
+
+
 OBJ
 
-    smartpins   : "core.con.smartpins"
-    streamer    : "core.con.streamer"
+    streamer:   "core.con.streamer"
+
 
 VAR
 
@@ -66,9 +67,11 @@ VAR
     byte _framebuffer[(WIDTH*HEIGHT)]
     byte _vsync_pin
 
+
 PUB start(): status
 ' Start using default I/O settings
     return startx(BASEPIN, WIDTH, HEIGHT, @_framebuffer)
+
 
 PUB startx(BASE_PIN, DISP_W, DISP_H, ptr_dispbuff): status
 ' Start using custom I/O settings
@@ -89,15 +92,18 @@ PUB startx(BASE_PIN, DISP_W, DISP_H, ptr_dispbuff): status
     _cog := status := coginit(NEWCOG, @DisplayEntry, @_params) + 1
     return
 
+
 PUB stop()
 ' Stop the driver
     if ( _cog )
         cogstop(_cog-1)
 
+
 PUB defaults()
 ' Default timings for 640x480 signalling
     set_timings(VF, VB, HF, HS, HB, HV)
     default_palette()
+
 
 PUB default_palette() | i, r, g, b, c
 ' Set up palette
@@ -130,9 +136,11 @@ PUB default_palette() | i, r, g, b, c
         c := 0 | (r << 16) | (g << 8) | b
         _palette[i] := c
 
+
 PUB clear()
 ' Clear the display
     bytefill(_ptr_drawbuffer, _bgcolor, _buff_sz)
+
 
 PUB draw_to(addr)
 ' Set address of (optional) draw/render buffer
@@ -141,9 +149,11 @@ PUB draw_to(addr)
 '       once a complete frame is rendered.
     _ptr_drawbuffer := addr
 
+
 PUB palette_ptr(): addr
 ' Pointer to palette data
     return @_palette
+
 
 PUB plot(x, y, color)
 ' Plot pixel at (x, y) in color
@@ -151,12 +161,14 @@ PUB plot(x, y, color)
         return                                  ' coords out of bounds, ignore
     byte[_ptr_drawbuffer][x + (y * _disp_width)] := color
 
+
 PUB point(x, y): pix_clr
 ' Get color of pixel at x, y
     x := 0 #> x <# _disp_xmax
     y := 0 #> y <# _disp_ymax
 
     return byte[_ptr_drawbuffer][x + (y * _disp_width)]
+
 
 PUB set_palette(p_pal) | src, dest, r, g, b
 ' Set up the driver with a custom palette
@@ -167,6 +179,7 @@ PUB set_palette(p_pal) | src, dest, r, g, b
         g := byte[p_pal++]
         b := byte[p_pal++]
         _palette[dest++] := 0 | (r << 16) | (g << 8) | b
+
 
 PUB set_timings(vfront, vback, hfront, hsync, hback, hvisible)
 ' Set video timings
@@ -183,19 +196,23 @@ PUB set_timings(vfront, vback, hfront, hsync, hback, hvisible)
     _hb := STREAMER_SETUP | (1 << streamer.LUTBASE) + hback/2
     _hv := STREAMER_SETUP | (1 << streamer.LUTBASE) + hvisible/2
 
+
 PUB show()
 ' Write the draw buffer to the display
 '   NOTE: This is only required when using double-buffering
     longmove(_ptr_dispbuff, _ptr_drawbuffer, _buff_sz/4)
+
+
+PUB vsync(): state
+' Get current state of vsync pin
+    return _pinr(_params[VSYNC_PAR])
+
 
 PUB wait_vsync()
 ' Wait for vertical sync signal to be high
     repeat until _pinr(_params[VSYNC_PAR]) == 0
     repeat until _pinr(_params[VSYNC_PAR]) == 1
 
-PUB vsync(): state
-' Get current state of vsync pin
-    return _pinr(_params[VSYNC_PAR])
 
 PRI memfill(xs, ys, val, count)
 ' Fill region of display buffer memory
@@ -203,6 +220,7 @@ PRI memfill(xs, ys, val, count)
 '   val: Color
 '   count: Number of consecutive memory locations to write
     bytefill(_ptr_drawbuffer + (xs + (ys * _bytesperln)), val, count)
+
 
 DAT
                         orgh
@@ -293,15 +311,15 @@ blank                   call    #hsync                      'blank lines
                         xcont   _hv, #0
             _ret_       djnz    x, #blank
 
-hsync                   xcont   _hf, #0                    'horizontal sync
+hsync                   xcont   _hf, #0                     'horizontal sync
                         xcont   _hs, #1
             _ret_       xcont   _hb, #0
 
 '
 ' Initialized data
 '
-dacmode_s               long    smartpins.DAC_123OHM_3V3 | smartpins.OUTPUT_ENABLED ' HSync
-dacmode_c               long    smartpins.DAC_75OHM_2V0 | smartpins.OUTPUT_ENABLED  ' R, G, B
+dacmode_s               long    P_DAC_124R_3V | P_OE        ' HSync
+dacmode_c               long    P_DAC_75R_2V | P_OE         ' R, G, B
 
 _vf                     long    0
 _vb                     long    0
@@ -310,8 +328,7 @@ _hs                     long    0   ' Sync
 _hb                     long    0   ' Before visible
 _hv                     long    0   ' Visible
 
-m_rf                    long    STREAMER_SETUP | (8 << streamer.LUTBASE) + 640/2    ' Visible RLONG 8BPP LUT
-
+m_rf                    long    STREAMER_SETUP | (8 << streamer.LUTBASE) | (640/2)
 framebuff_addr          long    0
 hsync_pin               long    0
 red_pin                 long    0
@@ -325,13 +342,14 @@ m_buf                   long    0
 _ptr_palette            long    0
 mycogid                 long    0
 
+
 CON
 
-    STREAMER_SETUP  = streamer.RFLONG_LUT_8BIT | streamer.X3X2X1X0 | streamer.OUT_DISABLE
+    STREAMER_SETUP  = X_IMM_2X16_2DAC8 | X_DACS_3_2_1_0
 
 DAT
 {
-Copyright 2023 Jesse Burt
+Copyright 2024 Jesse Burt
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,

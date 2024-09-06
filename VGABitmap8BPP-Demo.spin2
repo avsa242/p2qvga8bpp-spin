@@ -1,22 +1,19 @@
 {
-    --------------------------------------------
-    Filename: VGAbitmap8BPP-Demo.spin2
-    Description: Demo of the 8bpp VGA bitmap driver
-    Author: Jesse Burt
-    Copyright (c) 2023
-    Started: Apr 6, 2020
-    Updated: Aug 2, 2023
-    See end of file for terms of use.
-    --------------------------------------------
+----------------------------------------------------------------------------------------------------
+    Filename:       VGAbitmap8BPP-Demo.spin2
+    Description:    Demo of the 8bpp VGA bitmap driver
+    Author:         Jesse Burt
+    Started:        Apr 6, 2020
+    Updated:        Sep 6, 2024
+    Copyright (c) 2024 - See end of file for terms of use.
+----------------------------------------------------------------------------------------------------
 }
+
 CON
 
-    _clkfreq        = cfg._clkfreq_def
-    _xtlfreq        = cfg._xtlfreq
+    _clkfreq    = 180_000_000
+    _xtlfreq    = 20_000_000
 
-' -- User-modifiable constants
-    SER_BAUD        = 2_000_000
-' --
 
 VAR
 
@@ -24,14 +21,15 @@ VAR
     long _timer_set
     byte _timer_cog
 
+
 OBJ
 
-    cfg:    "boardcfg.p2eval"
-    ser:    "com.serial.terminal.ansi"
     fnt:    "font.5x8"
     math:   "math.int"
-    vga:    "display.vga.bitmap-8bpp" | BASEPIN=32, VF=10, VB=33, HF=16, HS=96, HB=48, HV=640
+    ser:    "com.serial.terminal.ansi" | SER_BAUD=2_000_000
+    vga:    "display.vga.bitmap-8bpp" | BASEPIN=24, VF=10, VB=33, HF=16, HS=96, HB=48, HV=640
     ' NOTE: Timings can also be changed with set_timings() (before calling driver start() )
+
 
 PUB main() | time_ms
 
@@ -95,6 +93,7 @@ PUB main() | time_ms
     vga.clear()
     repeat
 
+
 PUB demo_bouncing_ball(testtime, radius) | iteration, bx, by, dx, dy
 ' Draws a simple ball bouncing off screen edges
     bx := (math.rndi(XMAX) // (WIDTH - radius * 4)) + radius * 2  'Pick a random screen location to
@@ -121,6 +120,7 @@ PUB demo_bouncing_ball(testtime, radius) | iteration, bx, by, dx, dy
 
     report(testtime, iteration)
 
+
 PUB demo_bitmap(testtime, bitmap_addr) | iteration
 ' Continuously redraws bitmap at address bitmap_addr
     ser.str(@"demo_bitmap - ")
@@ -132,6 +132,7 @@ PUB demo_bitmap(testtime, bitmap_addr) | iteration
         iteration++
 
     report(testtime, iteration)
+
 
 PUB demo_box(testtime) | iteration, c
 ' Draws random boxes
@@ -146,6 +147,7 @@ PUB demo_box(testtime) | iteration, c
 
     report(testtime, iteration)
 
+
 PUB demo_box_filled(testtime) | iteration, c
 ' Draws random filled boxes
     ser.str(@"demo_box_filled - ")
@@ -158,6 +160,7 @@ PUB demo_box_filled(testtime) | iteration, c
         iteration++
 
     report(testtime, iteration)
+
 
 PUB demo_circle(testtime) | iteration, x, y, r, c
 ' Draws circles at random locations
@@ -175,6 +178,7 @@ PUB demo_circle(testtime) | iteration, x, y, r, c
 
     report(testtime, iteration)
 
+
 PUB demo_greet()
 ' Display the banner/greeting
     vga.fgcolor(vga.MAX_COLOR)
@@ -182,6 +186,7 @@ PUB demo_greet()
     vga.pos_xy(0, 1)
     vga.printf("VGA 8bpp on the Parallax P2X8C4M64P @ %dMHz\n\r", clkfreq/1_000_000)
     vga.printf("%dx%d", WIDTH, HEIGHT)
+
 
 PUB demo_line(testtime) | iteration, c
 ' Draws random lines
@@ -195,6 +200,7 @@ PUB demo_line(testtime) | iteration, c
         iteration++
 
     report(testtime, iteration)
+
 
 PUB demo_linesweep_x(testtime) | iteration, x, c
 ' Draws lines sweeping from left-right to the opposite diagonal direction
@@ -216,6 +222,7 @@ PUB demo_linesweep_x(testtime) | iteration, x, c
 
     report(testtime, iteration)
 
+
 PUB demo_linesweep_y(testtime) | iteration, y, c
 ' Draws lines sweeping from top-down to the opposite diagonal direction
     y := 0
@@ -236,6 +243,7 @@ PUB demo_linesweep_y(testtime) | iteration, y, c
 
     report(testtime, iteration)
 
+
 PUB demo_mem_scroller(testtime, start_addr, end_addr) | iteration, pos, st, en
 ' Dumps Propeller Hub RAM (and/or ROM) to the display buffer
     pos := start_addr
@@ -253,6 +261,7 @@ PUB demo_mem_scroller(testtime, start_addr, end_addr) | iteration, pos, st, en
 
     report(testtime, iteration)
 
+
 PUB demo_plot(testtime) | iteration, x, y, c
 ' Draws random pixels to the screen
     ser.printf("demo_plot - ")
@@ -265,6 +274,7 @@ PUB demo_plot(testtime) | iteration, x, y, c
         iteration++
 
     report(testtime, iteration)
+
 
 PUB demo_shadebobs(testtime) | iteration, x, y, xs, ys, p, offset, div, modifier
 ' Draws shadebobs along a sine-wave
@@ -290,6 +300,7 @@ PUB demo_shadebobs(testtime) | iteration, x, y, xs, ys, p, offset, div, modifier
 
     report(testtime, iteration)
 
+
 PUB demo_sinewave(testtime) | iteration, x, y, modifier, offset, div
 ' Draws a sine wave the length of the screen, influenced by the system counter
     ser.printf("demo_sinewave - ")
@@ -311,6 +322,7 @@ PUB demo_sinewave(testtime) | iteration, x, y, modifier, offset, div
         vga.clear()
 
     report(testtime, iteration)
+
 
 PUB demo_seq_text(testtime) | iteration, col, row, ch, fg, bg
 ' Sequentially draws the whole font table to the screen
@@ -336,6 +348,7 @@ PUB demo_seq_text(testtime) | iteration, col, row, ch, fg, bg
 
     report(testtime, iteration)
 
+
 PUB demo_rnd_text(testtime) | iteration, col, row, fg, bg
 ' Draws random characters to the screen
     ser.printf("demo_rnd_text - ")
@@ -355,6 +368,7 @@ PUB demo_rnd_text(testtime) | iteration, col, row, fg, bg
         iteration++
 
     report(testtime, iteration)
+
 
 PUB demo_tri_wave(testtime) | iteration, x, y, ydir
 ' Draws a simple triangular wave
@@ -378,6 +392,7 @@ PUB demo_tri_wave(testtime) | iteration, x, y, ydir
         iteration++
 
     report(testtime, iteration)
+
 
 PUB demo_wander(testtime) | iteration, x, y, d, c, movestep
 ' Draws randomly wandering pixels
@@ -413,12 +428,16 @@ PUB demo_wander(testtime) | iteration, x, y, d, c, movestep
 
     report(testtime, iteration)
 
+
 PUB report(testtime, iterations) | msec
 ' Display performance results
     msec := (testtime * 1_000) / iterations
-    ser.printf(@"Total iterations: %d, iterations/sec: %d, ms/iteration: %d.%03.3d", {
-}    iterations, iterations / (testtime/1000), (msec/1000), (msec//1000))
-    ser.newline()
+    ser.printf( @"Total iterations: %d, iterations/sec: %d, ms/iteration: %d.%03.3d\n\r", ...
+                iterations, ...
+                iterations / (testtime/1000), ...
+                (msec/1000), ...
+                (msec//1000) )
+
 
 PUB cog_timer() | time_left
 
@@ -432,9 +451,10 @@ PUB cog_timer() | time_left
         while (time_left > 0)
         _timer_set := 0
 
+
 PUB setup()
 
-    ser.start(SER_BAUD)
+    ser.start()
     ser.clear()
     ser.printf("Serial terminal started - p2 @ %dMHz\n\r", clkfreq/1000000)
 
@@ -442,10 +462,11 @@ PUB setup()
     vga.start()
     ser.strln(@"VGA 8bpp driver started")
     vga.set_font(fnt.ptr(), fnt.setup())
-    vga.char_attrs(vga.TERMINAL)
+    vga.char_attrs(vga.TERMINAL)                ' don't print glyphs for codes like 'CR' and 'LF'
     vga.clear()
 
     _timer_cog := cogspin(NEWCOG, cog_timer(), @_stack_timer)
+
 
 CON
 
@@ -457,7 +478,7 @@ CON
 
 DAT
 {
-Copyright 2023 Jesse Burt
+Copyright 2024 Jesse Burt
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,
