@@ -5,8 +5,8 @@
         * QVGA (320x240 - signalled as 640x480)
     Author:         Jesse Burt
     Started:        Apr 6, 2020
-    Updated:        Sep 6, 2024
-    Copyright (c) 2024 - See end of file for terms of use.
+    Updated:        Feb 7, 2025
+    Copyright (c) 2025 - See end of file for terms of use.
 ----------------------------------------------------------------------------------------------------
 
     NOTE: This is based on raycast5b_SpinDisplay2a.spin2,
@@ -36,6 +36,11 @@ CON
     HV          = 640
 
 
+    BPP         = 8                             ' bits per pixel/color depth of the display
+    BYTESPERPX  = 1 #> (BPP/8)                  ' limit to minimum of 1
+    BPPDIV      = BYTESPERPX #> (8 / BPP)       ' limit to range BYTESPERPX .. (8/BPP)
+    BUFF_SZ     = (WIDTH * HEIGHT) / BPPDIV
+    MAX_COLOR   = (1 << BPP)-1
     XMAX        = WIDTH-1
     YMAX        = HEIGHT-1
     CENTERX     = WIDTH/2
@@ -43,8 +48,6 @@ CON
 
 
     PIX_CLK     = 25_175_000
-    BYTESPERPX  = 1
-    MAX_COLOR   = 255
     HSYNC_PAR   = 0
     RED_PAR     = 1
     GREEN_PAR   = 2
@@ -64,7 +67,7 @@ VAR
     long _cog, _params[6]
     long _ptr_dispbuff
 
-    byte _framebuffer[(WIDTH*HEIGHT)]
+    byte _framebuffer[BUFF_SZ]
     byte _vsync_pin
 
 
@@ -349,7 +352,7 @@ CON
 
 DAT
 {
-Copyright 2024 Jesse Burt
+Copyright 2025 Jesse Burt
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,
